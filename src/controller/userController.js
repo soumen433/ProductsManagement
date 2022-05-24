@@ -1,6 +1,7 @@
 const userModel = require("../model/userModel");
 const aws = require("aws-sdk");
-const jwt = require ("jsonwebtoken")
+const jwt = require("jsonwebtoken")
+const bcrypt=require("bcrypt")
 
 
 /* ------------------------------------------------aws config -------------------------------------------------------- */
@@ -39,39 +40,54 @@ let uploadFile = async (file) => {
 
 /* ------------------------------------------------POST/register-------------------------------------------------------- */
 
-const createUser = async function(req,res){
- try{
-    let data = req.body;
-    let savedData = await userModel.create(data)
-    return res.status(201).send({status : true , msg : "User created successfully", data : savedData})
- }
- catch(err){
-     res.status(500).send({err : err.msg})
- }
+const createUser = async function (req, res) {
+    try {
+        let data = req.body;
+        let savedData = await userModel.create(data)
+        return res.status(201).send({ status: true, msg: "User created successfully", data: savedData })
+    }
+    catch (err) {
+        res.status(500).send({ err: err.msg })
+    }
 
 }
 
-const loginUser = async function(req,res){
-    try{
+const loginUser = async function (req, res) {
+    try {
         let data = req.body
-        let {email , password} = data
+        let { email, password } = data
         let savedData = await userModel.findOne(data)
-        if(savedData){
+        if (savedData) {
             jwt.sign({
-                userId : savedData._id,
+                userId: savedData._id,
 
-            }, "group-5-productManangement", {expiresIn : "1200s"})
-            
-            return res.status(201).send({status : true , msg : "User created successfully", data : savedData})
+            }, "group-5-productManangement", { expiresIn: "1200s" })
+
+            return res.status(201).send({ status: true, msg: "User created successfully", data: savedData })
         }
 
-        
-     }
-     catch(err){
-         res.status(500).send({err : err.msg})
-     }
-    
+
+    }
+    catch (err) {
+        res.status(500).send({ err: err.msg })
+    }
+
 
 }
 
-module.exports = {createUser}
+/* ------------------------------------------------PUT/API-------------------------------------------------------- */
+const updatedUser = async function (req, res) {
+    try {
+        let user = req.params.userId
+        let data = req.body
+
+        let updatedData = await userModel.findOneUpdate({ _id: user, data, new: true })
+        return res.status(200).send({ status: true, message: "User profile updated", data: updatedData })
+    }
+    catch (err) {
+        res.status(500).send({ err: err.message })
+    }
+}
+
+
+module.exports = { createUser,updatedUser,loginUser }

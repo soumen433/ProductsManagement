@@ -38,6 +38,8 @@ let uploadFile = async (file) => {
 
 }
 
+
+ 
 /* ------------------------------------------------POST/register-------------------------------------------------------- */
 
 const createUser = async function (req, res) {
@@ -75,6 +77,21 @@ const loginUser = async function (req, res) {
 
 }
 
+/*--------------------------------------------GET/API---------------------------------------------------*/
+
+const getUser = async function (req, res){
+try{
+    let user = req.params.userId
+    let data = await userModel.findOne({
+        _id: user
+    })
+    return res.status(200).send({ status: true, message: "List of user", data: data})
+}
+catch (err){
+    res.status(500).send({ err: err.message})
+}   
+}
+
 /* ------------------------------------------------PUT/API-------------------------------------------------------- */
 const updatedUser = async function (req, res) {
     try {
@@ -90,4 +107,4 @@ const updatedUser = async function (req, res) {
 }
 
 
-module.exports = { createUser,updatedUser,loginUser }
+module.exports = { createUser,updatedUser,loginUser , getUser}

@@ -57,12 +57,14 @@ const loginUser = async function(req,res){
         let {email , password} = data
         let savedData = await userModel.findOne(data)
         if(savedData){
-            jwt.sign({
+          const token =  jwt.sign({
                 userId : savedData._id,
 
             }, "group-5-productManangement", {expiresIn : "1200s"})
+
+            res.headers("Authorization","Bearer" + token )
             
-            return res.status(201).send({status : true , msg : "User created successfully", data : savedData})
+            return res.status(200).send({status : true , msg : "User logged in successfully", data : savedData})
         }
 
         

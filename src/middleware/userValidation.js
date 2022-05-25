@@ -138,6 +138,7 @@ const getValid = async function(req,res, next){
 
 const updateValid = async function(req,res, next){
     let user = req.params.userId
+    let data = req.body
     if(!user){
         return res.status(400).send({
             status: false,
@@ -147,12 +148,7 @@ const updateValid = async function(req,res, next){
     if(!ObjectId.isValid(user)){
         return res.status(400).send({status:false,message:"Please enter valid bookId"})
     }
-    let data = req.body;
-    if (Object.keys(data).length == 0) {
-      return res
-        .status(404)
-        .send({ status: false, msg: "Please provide details" });
-    }
+    
     if(data.email){
       if (!/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/.test(data.email)) {
           return res

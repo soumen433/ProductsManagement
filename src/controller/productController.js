@@ -46,6 +46,28 @@ const getProductsById = async function(req,res){
 
 }
 
+const updateProduct= async function(req,res){
+    let productId=req.params.productId
+    let data = req.body;
+   
+    let files = req.files
+    if (files && files.length > 0) {
+      let fileUrl = await uploadFile(files[0]);
+      data.productImage = fileUrl;
+    } 
+      
+    
+    
+    let updatedData = await productModel.findOneAndUpdate({ _id: productId }, data, {
+      new: true,
+    });
+    return res
+      .status(200)
+      .send({
+        status: true,
+        message: "User profile updated",
+        data: updatedData,
+      });
+}
 
-
-module.exports = {createProduct , getProducts}
+module.exports = {createProduct , getProducts,updateProduct}

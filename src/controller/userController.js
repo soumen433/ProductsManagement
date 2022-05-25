@@ -131,7 +131,17 @@ const updatedUser = async function (req, res) {
   try {
     let user = req.params.userId;
     let data = req.body;
-
+   // let files
+    let files = req.files;
+    
+    if(files.length!=0){
+    if (files && files.length > 0) {
+      let fileUrl = await uploadFile(files[0]);
+      data.profileImage = fileUrl;
+    } else {
+      return res.status(400).send({ msg: "No file found" });
+    }
+    }
     let updatedData = await userModel.findOneAndUpdate({ _id: user }, data, {
       new: true,
     });

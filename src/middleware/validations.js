@@ -190,14 +190,8 @@ const updateValid = async function(req,res, next){
   }
 }
 
-let arr1 = ['shipping' , 'billing']
-let arr2 = ['street' , 'city' , 'pincode']
-for(let i =0 ; i<arr1.length;i++){
-  if(!data.address[arr1[i]])
-return res.status(400).send({status : false , msg : `${arr1[i]} is mandatory`})
-  for(let j=0;j<arr2.length;j++){
-    if(!data.address[arr1[i]][arr2[j]])  return res.status(400).send({status : false , msg : `In  ${arr1[i]}, ${arr2[j]} is mandatory`})
-  }
+
+if(data.address){
   if ( (!/^[a-zA-Z ]+$/.test(data.address[arr1[i]].city))) {
     return res
       .status(400)

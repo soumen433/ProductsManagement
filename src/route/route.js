@@ -7,8 +7,8 @@ const { createUserValid, loginValid, getValid, updateValid } = require("../middl
 router.post("/register",createUserValid, userController.createUser)
 router.post("/login" ,loginValid, userController.loginUser)
 router.route("/user/:userId/profile")
-.get(authenticate.authentication, getValid, userController.getUser)
-.put( updateValid, userController.updatedUser)
+.get(authentication, getValid, userController.getUser)
+.put( authentication,updateValid, userController.updatedUser)
 
 
 module.exports = router;

@@ -1,14 +1,18 @@
 const userModel = require("../model/userModel");
-const {uploadFile} = require("../aws/aws")
+const { uploadFile } = require("../aws/aws")
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const { isValidBody } = require("../validation/validation");
 
 
 /* ------------------------------------------------POST/register-------------------------------------------------------- */
 
 const createUser = async function (req, res) {
   try {
+
+
     let data = req.body;
+
     let files = req.files;
     if (files && files.length > 0) {
       let fileUrl = await uploadFile(files[0]);
@@ -26,7 +30,7 @@ const createUser = async function (req, res) {
       });
 
     data.password = await encryptedPassword;
-   // console.log(data);
+    // console.log(data);
 
     let savedData = await userModel.create(data);
     return res
@@ -106,17 +110,17 @@ const updatedUser = async function (req, res) {
   try {
     let user = req.params.userId;
     let data = req.body;
-   
+
     let files = req.files;
-    
-    
+
+
     if (files && files.length > 0) {
       let fileUrl = await uploadFile(files[0]);
       data.profileImage = fileUrl;
-    } 
-      
-    
-    
+    }
+
+
+
     let updatedData = await userModel.findOneAndUpdate({ _id: user }, data, {
       new: true,
     });

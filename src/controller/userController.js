@@ -41,7 +41,7 @@ const loginUser = async function (req, res) {
   try {
     let data = req.body;
     let { email, password } = data;
-    let hash = await userModel.findOne({ email: email });
+    let hash = await userModel.findOne({ email: email }).collation({ locale: "en", strength: 2 });
     if (hash == null) {
       return res
         .status(400)
@@ -86,7 +86,7 @@ const getUser = async function (req, res) {
     let user = req.params.userId;
     let data = await userModel.findOne({
       _id: user,
-    });
+    }).collation({ locale: "en", strength: 2 });
     if (data == null) {
       return res
         .status(400)
@@ -119,7 +119,7 @@ const updatedUser = async function (req, res) {
     
     let updatedData = await userModel.findOneAndUpdate({ _id: user }, data, {
       new: true,
-    });
+    }).collation({ locale: "en", strength: 2 });
     return res
       .status(200)
       .send({

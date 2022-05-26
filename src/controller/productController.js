@@ -74,13 +74,7 @@ const getProduct = async function (req, res) {
   }
 };
 
-// const getProductsById = async function (req, res) {};
 
-//     }
-//     catch(err){
-//         return res.status(500).send({status : false , error : err.message})
-//     }
-// }
 
 const getProducts = async function(req,res){
     try{
@@ -98,9 +92,21 @@ const getProducts = async function(req,res){
     }
 }
 
-const getProductsById = async function(req,res){
+const getProductsById = async function (req, res) {
+  try{
+    const productId = req.params.productId;
 
-}
+    const productById = await productModel.findOne({_id: productId,isDeleted: false});
+
+  if (!productById) {return res.status(404).send({status: false,message: "No product found by this Product id",});}
+
+  res.status(200).send({ status: true, message: "success", data: productById });
+  }
+
+  catch(err){
+    return res.status(500).send({ status: false, error: err.message });
+  }
+  }
 
 const updateProduct= async function(req,res){
   try{
@@ -131,5 +137,5 @@ const updateProduct= async function(req,res){
     }
 }
 
-module.exports = {createProduct , getProducts,updateProduct,getProduct}
+module.exports = {createProduct , getProducts,updateProduct,getProduct , getProductsById}
 //module.exports = { createProduct, getProducts };

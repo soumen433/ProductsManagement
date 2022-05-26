@@ -106,17 +106,12 @@ const updatedUser = async function (req, res) {
   try {
     let user = req.params.userId;
     let data = req.body;
-   
     let files = req.files;
-    
     
     if (files && files.length > 0) {
       let fileUrl = await uploadFile(files[0]);
       data.profileImage = fileUrl;
     } 
-      
-    
-    
     let updatedData = await userModel.findOneAndUpdate({ _id: user }, data, {
       new: true,
     }).collation({ locale: "en", strength: 2 });

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { createUser, loginUser, getUser, updatedUser} = require("../controller/userController")
-const {createProduct , getProducts, updateProduct, getProductsById} = require("../controller/productController")
+const {createProduct , getProduct, updateProduct, getProductsById, deleteProduct} = require("../controller/productController")
 const {authentication , authorization} = require("../middleware/middleware")
 const { createUserValid, loginValid, getValid, updateValid } = require("../middleware/userValidation")
 
@@ -15,11 +15,11 @@ router.route("/user/:userId/profile")
 //...........................PRODUCT.......................................
 router.route("/products")
 .post(createProduct)
-.get(getProducts)
+.get(getProduct)
 router.route("/products/:productId")
 .get(getProductsById)
 .put(updateProduct)
-.delete()
+.delete(deleteProduct)
 
 
 module.exports = router;

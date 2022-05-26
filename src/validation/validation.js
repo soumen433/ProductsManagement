@@ -22,8 +22,8 @@ const isValidOnlyCharacters = function (data) {
 
 function isValidEmail(data) {
   if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(data))
-    return true
-  else return false
+    return false
+  else return true
 }
 function isValidPhone(data) {
   if (/^(\+\d{1,3}[- ]?)?\d{10}$/.test(data))
@@ -46,38 +46,10 @@ const isValidImageType = function (data) {
 
 const isValidAddress = function (data) {
   if (typeof (data) === "undefined" ||data === null) return false;
-  if (typeof (data) === "object" && Array.isArray(data) === false && Object.keys(value).length > 0) return true;
+  if (typeof (data) === "object" && Array.isArray(data) === false && Object.keys(data).length > 0) return true;
   return false;
 };
 
-// function isValidAddress(data) {
 
-//   let arr1 = ['shipping', 'billing']
-//   let arr2 = ['street', 'city', 'pincode']
-//   for (let i = 0; i < arr1.length; i++) {
-//     if (!data[arr1[i]])
-//       return res.status(400).send({ status: false, msg: `${arr1[i]} is mandatory` })
-//     for (let j = 0; j < arr2.length; j++) {
-//       if (!data[arr1[i]][arr2[j]]) return res.status(400).send({ status: false, msg: `In  ${arr1[i]}, ${arr2[j]} is mandatory` })
-//     }
-
-//     if ((!/^[a-zA-Z ]+$/.test(data[arr1[i]].city))) {
-//       return res
-//         .status(400)
-//         .send({
-//           status: false,
-//           message: `In ${arr1[i]} , city is invalid`
-//         });
-//     }
-
-//     if ((!/^[1-9][0-9]{5}$/.test(data[arr1[i]].pincode))) {
-//       return res
-//         .status(400)
-//         .send({ status: false, message: `In ${arr1[i]} , pincode is invalid}` });
-//     }
-
-//   }
-
-//}
 
 module.exports = { isValidBody, isValidInputValue, isValidObjectId, isValidImageType, isValidOnlyCharacters, isValidEmail, isValidPhone, isValidPassword, isValidAddress }

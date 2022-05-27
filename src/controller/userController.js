@@ -354,18 +354,27 @@ const updatedUser = async function (req, res) {
       updates["password"] = await encryptedPassword;
     }
 
+    address = JSON.parse(JSON.stringify(address));
+
     if (address) {
-      if (!Validator.isValidInputValue(address)&&!Validator.isValidAddress(address)) {
+      if (Validator.isValidInputValue(address)) {
         return res.status(400).send({
           status: false,
           message: "Address should be in valid format ",
         });
       }
-      address = JSON.parse(address);
+     
+
+      // if (!Validator.isValidAddress(address)) {
+      //   return res.status(400).send({
+      //     status: false,
+      //     message: "Address should be in valid format ",
+      //   });
+      // }
 
       const { shipping, billing } = address;
 
-      if (shipping) {
+      if (address.shipping) {
         if (!Validator.isValidAddress(shipping)) {
           return res.status(400).send({
             status: false,
@@ -375,18 +384,18 @@ const updatedUser = async function (req, res) {
 
         const { street, city, pincode } = shipping;
 
-        if (shipping["street"]) {
+        if (street) {
           if (!Validator.isValidInputValue(street)) {
             return res.status(400).send({
               status: false,
               message: "shipping address: street name should be in valid format ",
             });
           }
-          updates[address[shipping][street]] = street.trim()
+          updates["address.shipping.street"] = street.trim();
         }
 
-        if (shipping.city) {
-          if (!Validator.isValidInputValue(city)) {
+        if (city) {
+          if (!Validator.isValidInputValue(city) || !Validator.isValidOnlyCharacters(city)) {
             return res.status(400).send({
               status: false,
               message: "shipping address: city name should be in valid format ",
@@ -395,7 +404,7 @@ const updatedUser = async function (req, res) {
           updates["address.shipping.city"] = city.trim();
         }
 
-        if (shipping.pincode) {
+        if (pincode) {
           if (!Validator.isValidInputValue(pincode)) {
             return res.status(400).send({
               status: false,
@@ -416,7 +425,7 @@ const updatedUser = async function (req, res) {
 
           const { street, city, pincode } = billing;
 
-          if (billing.street) {
+          if (street) {
             if (!Validator.isValidInputValue(street)) {
               return res.status(400).send({
                 status: false,
@@ -426,8 +435,8 @@ const updatedUser = async function (req, res) {
             updates["address.billing.street"] = street.trim();
           }
 
-          if (billing.city) {
-            if (!Validator.isValidInputValue(city)) {
+          if (city) {
+            if (!Validator.isValidInputValue(city)|| !Validator.isValidOnlyCharacters(city)) {
               return res.status(400).send({
                 status: false,
                 message: "billing address: city name should be in valid format ",
@@ -436,7 +445,7 @@ const updatedUser = async function (req, res) {
             updates["address.billing.city"] = city.trim();
           }
 
-          if (billing.pincode) {
+          if (pincode) {
             if (!Validator.isValidInputValue(pincode)) {
               return res.status(400).send({
                 status: false,

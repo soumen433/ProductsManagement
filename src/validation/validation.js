@@ -50,6 +50,15 @@ const isValidAddress = function (data) {
   return false;
 };
 
+const isValidPincode = function(data){
+  if ((!/^[1-9][0-9]{5}$/.test(data.address[arr1[i]].pincode))) {
+    return res
+      .status(400)
+      .send({ status: false, message: `In ${arr1[i]} , pincode is invalid}`});
+  }
+}
 
 
-module.exports = { isValidBody, isValidInputValue, isValidObjectId, isValidImageType, isValidOnlyCharacters, isValidEmail, isValidPhone, isValidPassword, isValidAddress }
+
+
+module.exports = { isValidBody, isValidInputValue, isValidObjectId, isValidImageType, isValidOnlyCharacters, isValidEmail, isValidPhone, isValidPassword, isValidAddress,isValidPincode }

@@ -218,7 +218,7 @@ const getUser = async function (req, res) {
         .send({ status: false, message: " enter a valid userId" });
     }
 
-    let data = await userModel.findOne({_id: user,}).collation({ locale: "en", strength: 2 });
+    let data = await userModel.findOne({ _id: user, }).collation({ locale: "en", strength: 2 });
     if (data == null) {
       return res
         .status(400)
@@ -243,19 +243,213 @@ const updatedUser = async function (req, res) {
 
     if (!Validator.isValidObjectId(user)) {
       return res
-          .status(400)
-          .send({ status: false, message: " enter a valid userId" });
-  }
-
-
-    if (files && files.length > 0) {
-      let fileUrl = await uploadFile(files[0]);
-      data.profileImage = fileUrl;
+        .status(400)
+        .send({ status: false, message: " enter a valid userId" });
     }
 
-    let updatedData = await userModel.findOneAndUpdate({ _id: user }, data, {
-      new: true,
-    }).collation({ locale: "en", strength: 2 });
+    const userDetailByUserId = await userModel.findById(user);
+
+    if (!userDetailByUserId) {
+      return res
+        .status(404)
+        .send({ status: false, message: " user not found" });
+    }
+
+    const updates = {};
+
+    if (files && files.length > 0) {
+      if (!Validator.isValidImageType(files[0].mimetype)) {
+        return res
+          .status(400)
+          .send({ status: false, message: "Only images can be uploaded (jpeg/jpg/png)" });
+      }
+      const updatedProfileImageUrl = await AWS.uploadFile(files[0]);
+      updates["profileImage"] = updatedProfileImageUrl;
+    }
+
+    let { fname, lname, email, phone, address, password } = data;
+
+    if (fname) {
+      if (!Validator.isValidInputValue(fname) || !Validator.isValidOnlyCharacters(fname)) {
+        return res.status(400).send({
+          status: false,
+          message: "First name should be in valid format and should contains only alphabets",
+        });
+      }
+      updates["fname"] = fname.trim();
+    }
+
+    if (lname) {
+      if (!Validator.isValidInputValue(lname) || !Validator.isValidOnlyCharacters(lname)) {
+        return res.status(400).send({
+          status: false,
+          message: "Last name should be in valid format and should contains only alphabets",
+        });
+      }
+      updates["lname"] = lname.trim();
+    }
+
+    if (email) {
+      if (!Validator.isValidInputValue(email) || !Validator.isValidEmail(email)) {
+        return res
+          .status(400)
+          .send({ status: false, message: "Enter a valid email" });
+      }
+
+      const notUniqueEmail = await userModel.findOne({ email });
+
+      if (notUniqueEmail) {
+        return res
+          .status(400)
+          .send({ status: false, message: "Email address already exist" });
+      }
+      updates["email"] = email.trim();
+    }
+
+    if (phone) {
+      if (!Validator.isValidInputValue(phone) || !Validator.isValidPhone(phone)) {
+        return res.status(400).send({
+          status: false,
+          message: "Enter a valid phone number"
+        });
+      }
+
+      const notUniquePhone = await userModel.findOne({ phone });
+
+      if (notUniquePhone) {
+        return res
+          .status(400)
+          .send({ status: false, message: "phone number already exist" });
+      }
+      updates["phone"] = phone.trim();
+    }
+
+    if (password) {
+      if (!Validator.isValidInputValue(password) || !Validator.isValidPassword(password)) {
+        return res.status(400).send({
+          status: false,
+          message: "password should be valid and should contains 8 to 15 characters and must have 1 letter and 1 number",
+        });
+      }
+
+      const isOldPasswordSame = await bcrypt.compare(
+        password,
+        userDetailByUserId.password
+      );
+
+      if (isOldPasswordSame) {
+        return res
+          .status(400)
+          .send({ status: false, message: "can not update same password" });
+      }
+
+      const saltRounds = 10;
+      let encryptedPassword = bcrypt
+        .hash(data.password, saltRounds)
+        .then((hash) => {
+          console.log(`Hash: ${hash}`);
+          return hash;
+        });
+
+      updates["password"] = await encryptedPassword;
+    }
+
+    if (address) {
+      if (!Validator.isValidInputValue(address)&&!Validator.isValidAddress(address)) {
+        return res.status(400).send({
+          status: false,
+          message: "Address should be in valid format ",
+        });
+      }
+      address = JSON.parse(address);
+
+      const { shipping, billing } = address;
+
+      if (shipping) {
+        if (!Validator.isValidAddress(shipping)) {
+          return res.status(400).send({
+            status: false,
+            message: "Shipping address should be in valid format ",
+          });
+        }
+
+        const { street, city, pincode } = shipping;
+
+        if (shipping["street"]) {
+          if (!Validator.isValidInputValue(street)) {
+            return res.status(400).send({
+              status: false,
+              message: "shipping address: street name should be in valid format ",
+            });
+          }
+          updates[address[shipping][street]] = street.trim()
+        }
+
+        if (shipping.city) {
+          if (!Validator.isValidInputValue(city)) {
+            return res.status(400).send({
+              status: false,
+              message: "shipping address: city name should be in valid format ",
+            });
+          }
+          updates["address.shipping.city"] = city.trim();
+        }
+
+        if (shipping.pincode) {
+          if (!Validator.isValidInputValue(pincode)) {
+            return res.status(400).send({
+              status: false,
+              message: "shipping address: pincode should be in valid format ",
+            });
+          }
+          updates["address.shipping.pincode"] = pincode.trim();
+        }
+
+
+        if (address.billing) {
+          if (!Validator.isValidAddress(billing)) {
+            return res.status(400).send({
+              status: false,
+              message: "billing address should be in valid format ",
+            });
+          }
+
+          const { street, city, pincode } = billing;
+
+          if (billing.street) {
+            if (!Validator.isValidInputValue(street)) {
+              return res.status(400).send({
+                status: false,
+                message: "billing address: street name should be in valid format ",
+              });
+            }
+            updates["address.billing.street"] = street.trim();
+          }
+
+          if (billing.city) {
+            if (!Validator.isValidInputValue(city)) {
+              return res.status(400).send({
+                status: false,
+                message: "billing address: city name should be in valid format ",
+              });
+            }
+            updates["address.billing.city"] = city.trim();
+          }
+
+          if (billing.pincode) {
+            if (!Validator.isValidInputValue(pincode)) {
+              return res.status(400).send({
+                status: false,
+                message: "shipping address: pincode should be in valid format ",
+              });
+            }
+            updates["address.billing.pincode"] = pincode.trim();
+          }
+        }
+      }
+    }
+
+    let updatedData = await userModel.findByIdAndUpdate({ _id: user }, { $set: updates }, { new: true }).collation({ locale: "en", strength: 2 });
     return res
       .status(200)
       .send({
@@ -263,9 +457,12 @@ const updatedUser = async function (req, res) {
         message: "User profile updated",
         data: updatedData,
       });
-  } catch (err) {
+
+  }
+
+  catch (err) {
     res.status(500).send({ err: err.message });
   }
 };
 
-module.exports = { createUser, updatedUser, loginUser, getUser };
+module.exports = { createUser, updatedUser, loginUser, getUser }

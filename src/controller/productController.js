@@ -108,7 +108,7 @@ const getProduct = async function (req, res) {
         installments,
       } = filter;
       if (name) {
-        query.title = name.trim();
+        query.title = query.title.includes(name.trim());
       }
       if (description) {
         query.description = description.trim();
@@ -139,6 +139,10 @@ const getProduct = async function (req, res) {
 
       ]
     }).sort({ price: filter.priceSort });
+    if(data.length===0){  return res
+    .status(400)
+    .send({ status: false, message: " enter a valid productId" });
+    }
     console.log(data);
 
     return res
@@ -152,6 +156,12 @@ const getProduct = async function (req, res) {
 const getProductsById = async function (req, res) {
   try {
     const productId = req.params.productId;
+
+    if (!Validator.isValidObjectId(productId)) {
+      return res
+        .status(400)
+        .send({ status: false, message: " enter a valid productId" });
+    }
 
     const productById = await productModel
       .findOne({ _id: productId, isDeleted: false })
@@ -179,6 +189,13 @@ const updateProduct = async function (req, res) {
     let productId = req.params.productId;
     let data = req.body;
 
+    if (!Validator.isValidObjectId(productId)) {
+      return res
+        .status(400)
+        .send({ status: false, message: " enter a valid productId" });
+    }
+
+
     let files = req.files;
     if (files && files.length > 0) {
       let fileUrl = await uploadFile(files[0]);
@@ -186,12 +203,20 @@ const updateProduct = async function (req, res) {
     }
 
     let updatedData = await productModel.findOneAndUpdate(
-      { _id: productId },
+      { _id: productId,isDeleted:false },
       data,
       {
         new: true,
       }
     );
+    if (!updatedData) {
+      return res
+        .status(404)
+        .send({
+          status: false,
+          message: "No product found by this Product id",
+        });
+    }
     return res.status(200).send({
       status: true,
       message: "product details updated",
@@ -203,14 +228,33 @@ const updateProduct = async function (req, res) {
 };
 
 const deleteProduct = async function (req, res) {
+  try{
   let productId = req.params.productId;
-  await productModel.findOneAndUpdate(
+  if (!Validator.isValidObjectId(productId)) {
+    return res
+      .status(400)
+      .send({ status: false, message: " enter a valid productId" });
+  }
+
+ let productDelete= await productModel.findOneAndUpdate(
     { _id: productId, isDeleted: false },
     { isDeleted: true, deletedAt: new Date() }
   );
+  if (!productDelete) {
+    return res
+      .status(404)
+      .send({
+        status: false,
+        message: "No product found by this Product id",
+      });
+  }
+
   return res
     .status(200)
     .send({ status: true, message: "product deleted successfully" });
+  }catch(err){
+    return res.status(500).send({ status: false, error: err.message });
+  }
 };
 
 module.exports = {

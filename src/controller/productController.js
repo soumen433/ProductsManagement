@@ -96,19 +96,20 @@ const getProduct = async function (req, res) {
   try {
     let filter = req.query;
     let query = { isDeleted: false };
-    if (filter) {
+    if (filter) { 
       const {
-        name,
+        name,              //query.title : /.*(name.trim()).*/i
         description,
         isFreeShipping,
-        priceGreaterThan,
-        priceLessThan,
         style,
         size,
         installments,
       } = filter;
+
+     let nameIncludes = new RegExp(`${filter.name}`,"gi");
+    
       if (name) {
-        query.title = name.trim();
+        query.title = nameIncludes
       }
       if (description) {
         query.description = description.trim();
@@ -130,16 +131,19 @@ const getProduct = async function (req, res) {
         query.availableSizes = { $all: sizeArr };
       }
     }
-    console.log(query);
-    // console.log(productModel);
+    
+   
     let data = await productModel.find({
       $or: [
         query,
-        { $or: [{ price: { $gt: filter.priceGreaterThan } }, { price: { $lt: filter.priceLessThan } }] }
+      { $or: [{ price: { $gt: filter.priceGreaterThan } }, { price: { $lt: filter.priceLessThan } }] }
 
       ]
-    }).sort({ price: filter.priceSort });
-    console.log(data);
+    }).collation({ locale: "en", strength: 2 });
+    
+
+ 
+   
 
     return res
       .status(200)

@@ -9,7 +9,7 @@ const { createUserValid, loginValid, getValid, updateValid } = require("../middl
 router.post("/register",createUserValid, createUser)
 router.post("/login" ,loginValid, loginUser)
 router.route("/user/:userId/profile")
-.get(authentication, getUser)
+.get( getUser)
 .put(  updatedUser)
 
 //...........................PRODUCT.......................................

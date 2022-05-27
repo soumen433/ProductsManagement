@@ -96,19 +96,21 @@ const getProduct = async function (req, res) {
   try {
     let filter = req.query;
     let query = { isDeleted: false };
-    if (filter) {
+    if (filter) { 
       const {
-        name,
+        name,              //query.title : /.*(name.trim()).*/i
         description,
         isFreeShipping,
-        priceGreaterThan,
-        priceLessThan,
         style,
         size,
         installments,
       } = filter;
+
+     let nameIncludes = new RegExp(`${filter.name}`,"gi");
+    
       if (name) {
         query.title = query.title.includes(name.trim());
+        query.title = nameIncludes
       }
       if (description) {
         query.description = description.trim();
@@ -130,21 +132,20 @@ const getProduct = async function (req, res) {
         query.availableSizes = { $all: sizeArr };
       }
     }
-    console.log(query);
-    // console.log(productModel);
+    
+   
     let data = await productModel.find({
       $or: [
         query,
-        { $or: [{ price: { $gt: filter.priceGreaterThan } }, { price: { $lt: filter.priceLessThan } }] }
+      { $or: [{ price: { $gt: filter.priceGreaterThan } }, { price: { $lt: filter.priceLessThan } }] }
 
       ]
     }).sort({ price: filter.priceSort });
     if(data.length===0){  return res
-    .status(400)
-    .send({ status: false, message: " enter a valid productId" });
+    .status(404)
+    .send({ status: false, message: "No documents found" });
     }
-    console.log(data);
-
+    
     return res
       .status(200)
       .send({ status: true, message: "Success", data: data });

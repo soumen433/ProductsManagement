@@ -139,7 +139,7 @@ const getProduct = async function (req, res) {
       { $or: [{ price: { $gt: filter.priceGreaterThan } }, { price: { $lt: filter.priceLessThan } }] }
 
       ]
-    }).collation({ locale: "en", strength: 2 });
+    }).collation({ locale: "en", strength: 2 }).sort({ price: filter.priceSort });
     
 
  

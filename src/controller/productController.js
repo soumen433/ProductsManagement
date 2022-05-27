@@ -7,6 +7,8 @@ const createProduct = async function (req, res) {
     let data = req.body;
     let files = req.files;
     let { title, description, price, currencyId, currencyFormat, availableSizes } = data
+     console.log(title)
+     console.log(price)
 
     if (!Validator.isValidBody(data)) {
       return res.status(400).send({

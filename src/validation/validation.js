@@ -9,6 +9,7 @@ function isValidBody(data) {
 const isValidInputValue = function (data) {
   if (typeof (data) === 'undefined' || data === null) return false
   if (typeof (data) === 'string' && data.trim().length > 0) return true
+  if(typeof (data)=='object'|| data!=null) return true
   return false
 }
 

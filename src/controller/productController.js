@@ -1,10 +1,19 @@
 const productModel = require("../model/productModel");
 const { uploadFile } = require("../aws/aws");
+const Validator = require("../validation/validation")
 
 const createProduct = async function (req, res) {
   try {
     let data = req.body;
     let files = req.files;
+    let { title, description, price, currencyId, currencyFormat, availableSizes } = data
+
+    if (!Validator.isValidBody(data)) {
+      return res.status(400).send({
+        status: false,
+        message: "product data is required for registration",
+      })
+    }
 
     if (files && files.length > 0) {
       let fileUrl = await uploadFile(files[0]);
@@ -13,8 +22,65 @@ const createProduct = async function (req, res) {
       return res.status(400).send({ msg: "No file found" });
     }
 
+    if (!Validator.isValidInputValue(title)) {
+      return res.status(400).send({
+        status: false,
+        message: "title  required for registration",
+      })
+    }
+    let uniqueTitle = await productModel.findOne({ title: title })
+    if (uniqueTitle) {
+      return res.status(400).send({
+        status: false,
+        message: "title already present",
+      })
+    }
+
+    if (!Validator.isValidInputValue(description)) {
+      return res.status(400).send({
+        status: false,
+        message: "description  required for registration",
+      })
+    }
+
+    if (!Validator.isValidInputValue(price)) {
+      return res.status(400).send({
+        status: false,
+        message: "price  required for registration",
+      })
+    }
+
+    if (!Validator.isValidInputValue(currencyId) || (currencyId != "INR")) {
+      return res.status(400).send({
+        status: false,
+        message: "currencyId required for product registration  it should be INR",
+      })
+    }
+
+    if (!Validator.isValidInputValue(currencyFormat) || (currencyFormat != "₹")) {
+      return res.status(400).send({
+        status: false,
+        message: "currencyFormat required for registration  it should be ₹ ",
+      })
+    }
+
+    if (!Validator.isValidInputValue(availableSizes)) {
+      console.log(typeof availableSizes)
+      return res.status(400).send({
+        status: false,
+        message: "availableSizes required for registration at least one size ",
+      })
+    }
+    let enumSize = ["S", "XS", "M", "X", "L", "XXL", "XL"]
+    for (let i = 0; i < availableSizes.length; i++) {
+      if (!enumSize.includes(availableSizes[i])) {
+        return res.status(400).send({
+          status: false,
+          message: "availableSizes should be-[S, XS,M,X, L,XXL, XL]"
+        })
+      }
+    }
     let savedData = await productModel.create(data);
-    console.log(savedData);
 
     return res.status(201).send({
       status: true,

@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken')
 const userModel = require('../model/userModel')
+const Validator = require("../validation/validation");
+
 const authentication = async function (req, res, next) {
   try {
     let token = req.headers["authorization"];
@@ -32,26 +34,26 @@ const authorization = async function (req , res , next){
    
     let userId = req.userId
     let userIdfromParam = req.params.userId
+    if (!Validator.isValidObjectId(userIdfromParam)) {
+      return res
+        .status(400)
+        .send({ status: false, message: " Enter a valid userId" });
+    }
 
     const userByUserId = await userModel.findById(userIdfromParam)
 
     if (!userByUserId) {
-      return res.status(404).send({ status: false, message: " user not found" })
+      return res.status(404).send({ status: false, message: " User not found" })
   }
 
     if(userId!=userIdfromParam)
-    return res.status(403).send({ status: false, message: "unauthorized access" })
+    return res.status(403).send({ status: false, message: "Unauthorized access" })
 
     next()
-
   }
   catch(err){
     return res.status(500).send({ err: err.message })
   }
   }
-
-
-
-
 
 module.exports = {authentication , authorization}

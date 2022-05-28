@@ -1,87 +1,100 @@
 const productModel = require("../model/productModel");
 const { uploadFile } = require("../aws/aws");
-const Validator = require("../validation/validation")
+const Validator = require("../validation/validation");
 
+//-----------------------------POST/product--------------------------------------
 const createProduct = async function (req, res) {
   try {
     let data = req.body;
     let files = req.files;
-    let { title, description, price, currencyId, currencyFormat, availableSizes } = data
-     console.log(title)
-     console.log(price)
+    let {
+      title,
+      description,
+      price,
+      currencyId,
+      currencyFormat,
+      availableSizes,
+    } = data;
 
     if (!Validator.isValidBody(data)) {
       return res.status(400).send({
         status: false,
-        message: "product data is required for registration",
-      })
+        message: "Product data is required for registration",
+      });
     }
 
-    if (files && files.length > 0) {
-      let fileUrl = await uploadFile(files[0]);
-      data.productImage = fileUrl;
-    } else {
-      return res.status(400).send({ msg: "No file found" });
+    if (!files || files.length == 0) {
+      return res
+        .status(400)
+        .send({ status: false, message: "No profile image found" });
     }
 
-    if (!Validator.isValidInputValue(title)) {
+    if (!Validator.isValidImageType(files[0].mimetype)) {
       return res.status(400).send({
         status: false,
-        message: "title  required for registration",
-      })
+        message: "Only images can be uploaded (jpeg/jpg/png)",
+      });
     }
-    let uniqueTitle = await productModel.findOne({ title: title })
+
+    let fileUrl = await uploadFile(files[0]);
+    data.productImage = fileUrl;
+
+    let bodyArr = {
+      title,
+      description,
+      price,
+      currencyId,
+      currencyFormat,
+      availableSizes
+    };
+    for (let key in bodyArr) {
+      if (!Validator.isValidInputValue(bodyArr[key])) {
+        return res.status(400).send({
+          status: false,
+          message: `Field ${key} required for registration`,
+        });
+      }
+    }
+
+    let uniqueTitle = await productModel.findOne({ title: title }).collation({ locale: "en", strength: 2 });
     if (uniqueTitle) {
       return res.status(400).send({
         status: false,
-        message: "title already present",
-      })
+        message: "Title already present",
+      });
     }
 
-    if (!Validator.isValidInputValue(description)) {
-      return res.status(400).send({
-        status: false,
-        message: "description  required for registration",
-      })
+    if (!(/^[1-9][0-9]{2,5}\.[0-9]{2}|^[1-9][0-9]{2,5}$/).test(price)) {
+      return res
+        .status(400)
+        .send({ status: false, message: "Price should be minimum 3-5 digits and for decimal value- after decimal please take 2 digits" });
     }
 
-    if (!Validator.isValidInputValue(price)) {
+    if (currencyId != "INR") {
       return res.status(400).send({
         status: false,
-        message: "price  required for registration",
-      })
+        message:
+          "CurrencyId should be INR",
+      });
     }
 
-    if (!Validator.isValidInputValue(currencyId) || (currencyId != "INR")) {
+    if ( currencyFormat != "₹") {
       return res.status(400).send({
         status: false,
-        message: "currencyId required for product registration  it should be INR",
-      })
+        message: "CurrencyFormat should be ₹ ",
+      });
     }
 
-    if (!Validator.isValidInputValue(currencyFormat) || (currencyFormat != "₹")) {
-      return res.status(400).send({
-        status: false,
-        message: "currencyFormat required for registration  it should be ₹ ",
-      })
-    }
-
-    if (!Validator.isValidInputValue(availableSizes)) {
-      console.log(typeof availableSizes)
-      return res.status(400).send({
-        status: false,
-        message: "availableSizes required for registration at least one size ",
-      })
-    }
-    let enumSize = ["S", "XS", "M", "X", "L", "XXL", "XL"]
+    let enumSize = ["S", "XS", "M", "X", "L", "XXL", "XL"].collation({locale: 'en', strength:2});
     for (let i = 0; i < availableSizes.length; i++) {
       if (!enumSize.includes(availableSizes[i])) {
         return res.status(400).send({
           status: false,
-          message: "availableSizes should be-[S, XS,M,X, L,XXL, XL]"
-        })
+          message: "availableSizes should be-[S, XS,M,X, L,XXL, XL]",
+        });
       }
     }
+
     let savedData = await productModel.create(data);
 
     return res.status(201).send({
@@ -98,9 +111,9 @@ const getProduct = async function (req, res) {
   try {
     let filter = req.query;
     let query = { isDeleted: false };
-    if (filter) { 
+    if (filter) {
       const {
-        name,              //query.title : /.*(name.trim()).*/i
+        name,
         description,
         isFreeShipping,
         style,
@@ -108,10 +121,10 @@ const getProduct = async function (req, res) {
         installments,
       } = filter;
 
-     let nameIncludes = new RegExp(`${filter.name}`,"gi");
-    
+      let nameIncludes = new RegExp(`${filter.name}`, "gi");
+
       if (name) {
-        query.title = nameIncludes
+        query.title = nameIncludes;
       }
       if (description) {
         query.description = description.trim();
@@ -133,19 +146,21 @@ const getProduct = async function (req, res) {
         query.availableSizes = { $all: sizeArr };
       }
     }
-    
-   
-    let data = await productModel.find({
-      $or: [
-        query,
-      { $or: [{ price: { $gt: filter.priceGreaterThan } }, { price: { $lt: filter.priceLessThan } }] }
 
-      ]
-    }).collation({ locale: "en", strength: 2 }).sort({ price: filter.priceSort });
-    
-
- 
-   
+    let data = await productModel
+      .find({
+        $or: [
+          query,
+          {
+            $or: [
+              { price: { $gt: filter.priceGreaterThan } },
+              { price: { $lt: filter.priceLessThan } },
+            ]
+          }
+        ]
+      })
+      .collation({ locale: "en", strength: 2 })
+      .sort({ price: filter.priceSort });
 
     return res
       .status(200)
@@ -164,12 +179,10 @@ const getProductsById = async function (req, res) {
       .collation({ locale: "en", strength: 2 });
 
     if (!productById) {
-      return res
-        .status(404)
-        .send({
-          status: false,
-          message: "No product found by this Product id",
-        });
+      return res.status(404).send({
+        status: false,
+        message: "No product found by this Product id",
+      });
     }
 
     res
@@ -226,4 +239,3 @@ module.exports = {
   getProductsById,
   deleteProduct,
 };
-//module.exports = { createProduct, getProducts };

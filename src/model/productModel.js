@@ -7,36 +7,30 @@ const productSchema = new mongoose.Schema(
       required: true,
       unique: true
     },
-
     description: {
       type: String,
-      required: true,
+      required: true
     },
-
     price: {
       type: Number,
       required: true
     },
-
     currencyId: {
       type: String,
-      required: true,
+      required: true
     },
-
     currencyFormat: {
       type: String,
       required: true
     },
-
     isFreeShipping: {
       type: Boolean,
       default: false
     },
-
     productImage: {
           type: String,
-           //required: true
-        },
+          required: true
+    },
     style: {
         type: String
     },

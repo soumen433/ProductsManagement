@@ -3,14 +3,13 @@ const router = express.Router();
 const { createUser, loginUser, getUser, updatedUser} = require("../controller/userController")
 const {createProduct , getProduct, updateProduct, getProductsById, deleteProduct} = require("../controller/productController")
 const {authentication , authorization} = require("../middleware/middleware")
-const { createUserValid, loginValid, getValid, updateValid } = require("../middleware/userValidation")
 
 //..........................USER.........................................
-router.post("/register",createUserValid, createUser)
-router.post("/login" ,loginValid, loginUser)
+router.post("/register", createUser)
+router.post("/login" , loginUser)
 router.route("/user/:userId/profile")
-.get( getUser)
-.put(  updatedUser)
+.get(authentication,authorization, getUser)
+.put(authentication,authorization, updatedUser)
 
 //...........................PRODUCT.......................................
 router.route("/products")

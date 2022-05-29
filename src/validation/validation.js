@@ -82,7 +82,13 @@ const isValidPincode = function(data){
   return false
 }
 
+/* -------------------------------------price format----------------------------------------------- */
+const isValidPrice = function(data){
+  if ((/^[1-9][0-9]{2,5}\.[0-9]{2}|^[1-9][0-9]{2,5}$/).test(data)) {
+return true
+  }
+  return false
+}
 
 
-
-module.exports = { isValidBody, isValidInputValue, isValidObjectId, isValidImageType, isValidOnlyCharacters, isValidEmail, isValidPhone, isValidPassword, isValidAddress,isValidPincode }
+module.exports = { isValidBody, isValidInputValue, isValidObjectId, isValidImageType, isValidOnlyCharacters, isValidEmail, isValidPhone, isValidPassword, isValidAddress,isValidPincode, isValidPrice }

@@ -230,9 +230,16 @@ const getUser = async function (req, res) {
 
     let data = await userModel.findOne({ _id: user });
 
-    return res
-      .status(200)
-      .send({ status: true, message: "User profile details", data: data });
+    return data
+    ? res
+        .status(200)
+        .send({ status: true, message: "User profile details", data: data })
+    : res
+        .status(400)
+        .send({
+          status: false,
+          message: "No user found!",
+        });
   } catch (err) {
     res.status(500).send({ err: err.message });
   }

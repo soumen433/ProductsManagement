@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { createUser, loginUser, getUser, updatedUser} = require("../controller/userController")
 const {createProduct , getProduct, updateProduct, getProductsById, deleteProduct} = require("../controller/productController")
+const { createCart } = require('../controller/cartController')
 const {authentication , authorization} = require("../middleware/middleware")
 
 //..........................USER.........................................
@@ -20,5 +21,8 @@ router.route("/products/:productId")
 .put(updateProduct)
 .delete(deleteProduct)
 
+//..............................CART.......................................
+router.route("/users/:userId/cart")
+.post( createCart)
 
 module.exports = router;

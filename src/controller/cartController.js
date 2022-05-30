@@ -224,7 +224,7 @@ const delCart = async (req, res) => {
     let tokenId = req['userId']
 
     if (!(Validator.isValidAddress(userId))){
-      returnres.status(400).send({status: false. message:"Please Provide User Id"})
+      return res.status(400).send({status : false,  message: "Please Provide User Id"})
     }
 
     if (!(Validator.isValidObjectId(userId))){

@@ -303,4 +303,30 @@ const updateCart = async function (req, res) {
   }
 }
 
-module.exports = { createCart, updateCart }
+
+
+
+const getsCard = async function (req, res) {
+  try {
+  let user_Id = req.params.userId
+  // if (!Validator.isValidObjectId(user_Id)) {
+  //   return res
+  //     .status(400)
+  //     .send({ status: false, message: " Enter a valid userId" });
+  // }
+  // let uservalid = await userModel.findById(user_Id)
+
+  // if (!uservalid) return res.status(404).send({ status: false, message: "user not found" })
+
+  let cardDetails = await cartModel.findOne({ userId: user_Id }).populate()
+
+  if (!cardDetails) return res.status(404).send({ status: false, message: "cart not found" })
+
+  return res.status(200).send({ data: cardDetails })
+  }
+  catch(err){
+     return res.status(500).send({status:false,message:err.message})
+  }
+}
+
+module.exports = { createCart,getsCard,updateCart }

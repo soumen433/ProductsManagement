@@ -91,85 +91,59 @@ const createCart = async function (req, res) {
   // console.log(cartData1)
   // let cartCreate = await cartModel.create(cartData1)
   // return res.status(201).send({status: true, message: "Cart created successfully", data: cartCreate})
-try{
-  const userId = req.params.userId;
-  if (!Validator.isValidObjectId(userId)) {
-    return res
-      .status(400)
-      .send({ status: false, message: " Enter a valid userId" });
-  }
-
-  let user = await userModel.findById(userId);
-  if (!user) {
-    return res
-      .status(400)
-      .send({ status: false, message: "No user Found!" });
-  }
-
-  const data = req.body
-  if (!Validator.isValidBody(data)) {
-    return res.status(400).send({
-      status: false,
-      message: "Product data is required for cart",
-    });
-  }
-
-  const { productId, cartId } = data
-  if (!Validator.isValidObjectId(productId)) {
-    return res
-      .status(400)
-      .send({ status: false, message: " Enter a valid productId" });
-  }
-
-  let productData = await productModel.findById(productId)
-
-  if (!productData) {
-    return res.status(400).send({ status: false, message: "Product doesn't exist" })
-  }
-
-  if (cartId) {
-    if (!Validator.isValidObjectId(cartId)) {
+  try {
+    const userId = req.params.userId;
+    if (!Validator.isValidObjectId(userId)) {
       return res
         .status(400)
-        .send({ status: false, message: " Enter a valid cartId" });
+        .send({ status: false, message: " Enter a valid userId" });
     }
 
-    let cart = await cartModel.findOne({ _id: cartId })
-    if (!cart)
-      return res.status(400).send({ status: false, message: "cart does not exist with this id" })
-
-
-    let cartData = await cartModel.findOne({ userId: userId })
-
-    if (cartId !== cartData._id.toString()) {
-      return res.status(400).send({ status: false, message: "This cartId is not for this user" })
+    let user = await userModel.findById(userId);
+    if (!user) {
+      return res
+        .status(400)
+        .send({ status: false, message: "No user Found!" });
     }
 
-    let arr = cartData.items
-    let product1 = {
-      'productId': productId,
-      'quantity': 1
+    const data = req.body
+    if (!Validator.isValidBody(data)) {
+      return res.status(400).send({
+        status: false,
+        message: "Product data is required for cart",
+      });
     }
-    compareId = arr.findIndex(obj => obj.productId == productId)
-    console.log(compareId)
-    if (compareId == -1) {
-      arr.push(product1)
+
+    const { productId, cartId } = data
+    if (!Validator.isValidObjectId(productId)) {
+      return res
+        .status(400)
+        .send({ status: false, message: " Enter a valid productId" });
     }
-    else {
-      arr[compareId].quantity += 1
+
+    let productData = await productModel.findById(productId)
+
+    if (!productData) {
+      return res.status(400).send({ status: false, message: "Product doesn't exist" })
     }
-    await cartData.save()
 
-    return res.status(201).send({ status: true, message: "product added to the cart successfully", data: cartData })
-    //add krna h bas
+    if (cartId) {
+      if (!Validator.isValidObjectId(cartId)) {
+        return res
+          .status(400)
+          .send({ status: false, message: " Enter a valid cartId" });
+      }
+
+      let cart = await cartModel.findOne({ _id: cartId })
+      if (!cart)
+        return res.status(400).send({ status: false, message: "cart does not exist with this id" })
 
 
-  }
-  else {
+      let cartData = await cartModel.findOne({ userId: userId })
 
-    let cartData = await cartModel.findOne({ userId: userId })
-
-    if (cartData) {
+      if (cartId !== cartData._id.toString()) {
+        return res.status(400).send({ status: false, message: "This cartId is not for this user" })
+      }
 
       let arr = cartData.items
       let product1 = {
@@ -183,39 +157,150 @@ try{
       }
       else {
         arr[compareId].quantity += 1
+        cartData.totalItems+=1
+        cartData.totalPrice = 0
+        for(let i =0 ; i<arr.length;i++){
+          let product = await productModel.findOne({_id : arr[i].productId})
+          cartData.totalPrice+= arr[i].quantity*(product.price)
+        }
       }
       await cartData.save()
 
-      return res.status(200).send({ status: true, message: "product added to the cart successfully", data: cartData })
+      return res.status(201).send({ status: true, message: "product added to the cart successfully", data: cartData })
+      //add krna h bas
+
+
     }
     else {
-      let items = []
-      let product1 = {
-        'productId': productId,
-        'quantity': 1
+
+      let cartData = await cartModel.findOne({ userId: userId })
+
+      if (cartData) {
+
+        let arr = cartData.items
+        let product1 = {
+          'productId': productId,
+          'quantity': 1
+        }
+        compareId = arr.findIndex(obj => obj.productId == productId)
+        console.log(compareId)
+        if (compareId == -1) {
+          arr.push(product1)
+        
+        }
+        else {
+          arr[compareId].quantity += 1
+          cartData.totalItems+=1
+          cartData.totalPrice = 0
+          for(let i =0 ; i<arr.length;i++){
+            let product = await productModel.findOne({_id : arr[i].productId})
+            cartData.totalPrice+= arr[i].quantity*(product.price)
+          }
+        
+        }
+        await cartData.save()
+
+        return res.status(200).send({ status: true, message: "product added to the cart successfully", data: cartData })
       }
-      items.push(product1)
-      let product = await productModel.findOne({ _id: productId })
-      let cartBody = {
-        userId: userId,
-        items: items,
-        totalPrice: product.price,
-        totalItems: 1
+      else {
+        let items = []
+        let product1 = {
+          'productId': productId,
+          'quantity': 1
+        }
+        items.push(product1)
+        let product = await productModel.findOne({ _id: productId })
+        let cartBody = {
+          userId: userId,
+          items: items,
+          totalPrice: product.price,
+          totalItems: 1
+        }
+
+        let cartSavedData = await cartModel.create(cartBody)
+        console.log(cartSavedData)
+        return res.status(201).send({ status: true, message: "Cart created successfully", data: cartSavedData })
       }
 
-      let cartSavedData = await cartModel.create(cartBody)
-      console.log(cartSavedData)
-      return res.status(201).send({ status: true, message: "Cart created successfully", data: cartSavedData })
+      //     //nhi hai  create kro
+
+    }
+  }
+  catch (err) {
+    return res.status(500).send({ status: false, error: err.message })
+  }
+
+}
+
+/********************************************************************Put Api********************************************************/
+
+const updateCart = async function (req, res) {
+  try {
+    let userId = req.params.userId
+    let { cartId, productId, removeProduct } = req.body
+
+
+    if (!Validator.isValidObjectId(userId)) {
+      return res.status(400).send({ status: false, message: " Enter a valid userId" });
     }
 
-    //     //nhi hai  create kro
+    let user = await userModel.findOne({ _id: userId , isDeleted : false })
+    if (!user)
+      return res.status(400).send({ status: false, msg: "User does not exist" })
+
+    if(!productId)
+    return res.status(400).send({ status: false, message: " Please provide productId" });
+
+    if (!Validator.isValidObjectId(productId)) {
+      return res.status(400).send({ status: false, message: " Enter a valid productId" });
+    }
+    
+    if (!Validator.isValidObjectId(productId)) {
+      return res.status(400).send({ status: false, message: " Enter a valid cartId" });
+    }
+
+    let product = await productModel.findOne({ _id: productId, isDeletd: false })
+    if (!product)
+      return res.status(400).send({ status: false, msg: "Product does not exist" })
+
+
+    let cart = await cartModel.findOne({ userId: userId })
+    if (!cart)
+      return res.status(400).send({ status: false, msg: "cart does not exist" })
+
+    if (userId !== cart.userId.toString())
+      return res.status(400).send({ status: false, msg: "cart does not belong to the user" })
+
+
+    let arr = cart.items
+    compareId = arr.findIndex(obj => obj.productId == productId)
+    if (removeProduct == 0) {
+
+      arr.splice(compareId, 1)
+      cart.totalItems-=1
+      cart.totalPrice-=product.price
+      await cart.save()
+
+      return res.status(400).send({ status: true, data: cart })
+    }
+    else if (removeProduct == 1) {
+      
+      if(!arr[compareId].quantity>0)
+      arr.splice(compareId, 1)
+      if(!arr[compareId].quantity>0)
+      return res.status(400).send({ status: true, data: cart })
+      arr[compareId].quantity-=1
+      cart.totalItems-=1
+      cart.totalPrice-=product.price
+      await cart.save()
+
+      return res.status(400).send({ status: true, data: cart })
+    }
 
   }
-}
-catch(err){
-  return res.status(500).send({status : false , error : err.message})
-}
-
+  catch (err) {
+    return res.status(500).send({ status: false, error: err.message })
+  }
 }
 
-module.exports = { createCart }
+module.exports = { createCart, updateCart }

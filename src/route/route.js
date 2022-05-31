@@ -3,6 +3,7 @@ const router = express.Router();
 const { createUser, loginUser, getUser, updatedUser} = require("../controller/userController")
 const {createProduct , getProduct, updateProduct, getProductsById, deleteProduct} = require("../controller/productController")
 const { createCart,getsCard , updateCart, delCart} = require('../controller/cartController')
+const{orderCreate}=require("../controller/orderController")
 const {authentication , authorization} = require("../middleware/middleware")
 
 //..........................USER.........................................
@@ -28,4 +29,8 @@ router.route("/users/:userId/cart")
 .get(getsCard)
 .delete (delCart)
 
+
+//..............................ORDER......................................
+router.route("/users/:userId/orders")
+.post(orderCreate)
 module.exports = router;

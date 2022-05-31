@@ -1,50 +1,61 @@
-const mongoose=require("mongoose")
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Schema.Types.ObjectId;
 
-const orderSchema= new mongoose.Schema(
-    {
-        userId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'user',
-            required: true,
+const orderSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: ObjectId,
+      ref: "User",
+      required: true,
+    },
+    items: [
+      {
+        productId: {
+          type: ObjectId,
+          ref: "Product",
+          required: true,
         },
-        items: [{
-            productId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Product',
-                required: true
-            },
-            quantity: {
-                type: Number,
-                required: true
-            },
-            _id: false
-        }],
-        totalPrice: {
-            type: Number,
-            required: true
+        quantity: {
+          type: Number,
+          required: true,
+          min: 1,
         },
-        totalItems: {
-            type: Number,
-            required: true
-        },
-        totalQuantity:{
-            type:Number,
-            required:true
-        },
-        cancellable:{
-            type:Boolean,
+      },
+    ],
+    totalPrice: {
+      type: Number,
+      required: true,
+    },
+    totalItems: {
+      type: Number,
+      required: true,
+    },
+    totalQuantity: {
+      type: Number,
+      required: true,
+    },
 
-            default:true
-        },
-        status:{
-            type:String,
-            enum:["pending", "completed", "cancled"],
-            default:"pending"
-        },
-        isDeleted:{
-            type:Boolean,
-            default:false
-        },
-    },{timestamps: true}
-)
-module.exports = mongoose.model("order", orderSchema);
+    cancellable: {
+      type: Boolean,
+      default: "true",
+    },
+
+    status: {
+      type: String,
+      default: "pending",
+      enum: ["pending", "completed", "cancelled"],
+    },
+
+    deletedAt: {
+      type: Date,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+  },
+
+  { timestamps: true }
+);
+
+module.exports = mongoose.model("Order", orderSchema);

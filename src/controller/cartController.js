@@ -7,16 +7,6 @@ const Validator = require("../validation/validation");
 const createCart = async function (req, res) {
   try {
     const userId = req.params.userId;
-    if (!Validator.isValidObjectId(userId)) {
-      return res
-        .status(400)
-        .send({ status: false, message: " Enter a valid userId" });
-    }
-
-    let user = await userModel.findById(userId);
-    if (!user) {
-      return res.status(400).send({ status: false, message: "No user Found!" });
-    }
 
     const data = req.body;
     if (!Validator.isValidBody(data)) {
@@ -156,18 +146,6 @@ const updateCart = async function (req, res) {
   try {
     let userId = req.params.userId;
 
-    if (!Validator.isValidObjectId(userId)) {
-      return res
-        .status(400)
-        .send({ status: false, message: " Enter a valid userId" });
-    }
-
-    let user = await userModel.findOne({ _id: userId });
-    if (!user)
-      return res
-        .status(400)
-        .send({ status: false, msg: "User does not exist" });
-
     let { cartId, productId, removeProduct } = req.body;
 
     if (!productId)
@@ -260,16 +238,6 @@ const getCart = async function (req, res) {
   try {
     let userId = req.params.userId;
 
-    if (!Validator.isValidObjectId(userId)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "Please enter a valid user ID" });
-    }
-    let user = await userModel.findById(userId);
-    if (!user) {
-      return res.status(404).send({ status: false, message: "User not found" });
-    }
-
     let cartDetails = await cartModel
       .findOne({ userId: userId })
       .populate("items.productId");
@@ -294,20 +262,6 @@ const getCart = async function (req, res) {
 const delCart = async (req, res) => {
   try {
     let userId = req.params.userId;
-
-    if (!Validator.isValidObjectId(userId)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "This is not a valid User Id" });
-    }
-
-    let checkUser = await userModel.findOne({ _id: userId });
-
-    if (!checkUser) {
-      return res
-        .status(404)
-        .send({ status: false, message: "This User does Not Exist" });
-    }
 
     let deleteCart = await cartModel.findOneAndUpdate(
       { userId: userId },

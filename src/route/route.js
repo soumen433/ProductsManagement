@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { createUser, loginUser, getUser, updatedUser} = require("../controller/userController")
 const {createProduct , getProduct, updateProduct, getProductsById, deleteProduct} = require("../controller/productController")
-const { createCart,getsCard , updateCart} = require('../controller/cartController')
+const { createCart,getsCard , updateCart,delCart} = require('../controller/cartController')
 const {authentication , authorization} = require("../middleware/middleware")
 
 //..........................USER.........................................

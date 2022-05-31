@@ -220,42 +220,6 @@ const updateCart = async function (req, res) {
 //--------------------------------------------------------get cart-------------------------------------------------------------------
 
 
-const delCart = async (req, res) => {
-  try {
-    let userId = req.params.userId
-    let tokenId = req['userId']
-
-    if (!userId){
-      return res.status(400).send({status : false,  message: "Please Provide User Id"})
-    }
-
-    if (!(Validator.isValidObjectId(userId))){
-      return res.status(400).send({status: false, message: "This user is not a valid User Is"})
-    }
-
-    let checkUser = await userModel.findOne({userId: userId})
-
-    if (!checkUser){
-      return res.status(404).send({ status: false, message: "This User is Not Exist"})
-    }
-
-     /*if (!(userId === tokenId)){
-      return res.status(401).send({ status: false, message: "Unauthorized User"})
-    }*/ 
-
-    let checkCart = await cartModel.findOne({ userId: userId})
-   
-    if(!checkCart) {
-      return res.status(404).send({ status: false, message: "Cart Not Exist With This User"})
-    }
-    
-    let deleteCart = await cartModel.findOneAndUpdate({ userId: userId}, { items:[], totalPrice: 0, totalItems: 0}, { new: true})
-    return res.status(200).send({ status: false, message: "Cart Successfully Deleted", data: deleteCart})
-  }
-  catch (error) {
-    return res.status(500).send({ status: false, message: error.message})
-  }
-}
 
 
 const getsCard = async function (req, res) {
@@ -270,7 +234,11 @@ const getsCard = async function (req, res) {
 
     // if (!uservalid) return res.status(404).send({ status: false, message: "user not found" })
 
-    let cardDetails = await cartModel.findOne({ userId: user_Id }).populate()
+    if (!(Validator.isValidObjectId(userId))){
+      return res.status(400).send({status: false, message: "This user is not a valid User Is"})
+    }
+
+    let cardDetails = await cartModel.findOne({ userId: user_Id })
 
     if (!cardDetails) return res.status(404).send({ status: false, message: "cart not found" })
 
@@ -281,4 +249,44 @@ const getsCard = async function (req, res) {
   }
 }
 
-module.exports = { createCart, getsCard, updateCart }
+//----------------------------------------------------delete cart-----------------------------------------------------------
+
+
+const delCart = async (req, res) => {
+  try {
+    let userId = req.params.userId
+    let tokenId = req['userId']
+
+    if (!userId){
+      return res.status(400).send({status : false,  message: "Please Provide User Id"})
+    }
+
+    if (!(Validator.isValidObjectId(userId))){
+      return res.status(400).send({status: false, message: "This is not a valid User Id"})
+    }
+
+    let checkUser = await userModel.findOne({userId: userId})
+
+    if (!checkUser){
+      return res.status(404).send({ status: false, message: "This User does Not Exist"})
+    }
+
+     /*if (!(userId === tokenId)){
+      return res.status(401).send({ status: false, message: "Unauthorized User"})
+    }*/ 
+
+    let checkCart = await cartModel.findOne({ userId: userId})
+   
+    if(!checkCart) {
+      return res.status(404).send({ status: false, message: "Cart does Not exist With This User"})
+    }
+    
+    let deleteCart = await cartModel.findOneAndUpdate({ userId: userId}, { items:[], totalPrice: 0, totalItems: 0}, { new: true})
+    return res.status(200).send({ status: false, message: "Cart Successfully Deleted", data: deleteCart})
+  }
+  catch (error) {
+    return res.status(500).send({ status: false, message: error.message})
+  }
+}
+
+module.exports = { createCart, getsCard, updateCart,delCart }

@@ -26,6 +26,6 @@ router.route("/users/:userId/cart")
 .post(createCart)
 .put(updateCart)
 .get(getsCard)
-
+.delete (delCart)
 
 module.exports = router;

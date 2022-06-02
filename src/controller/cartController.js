@@ -66,7 +66,8 @@ const createCart = async function (req, res) {
         arr.push(product1);
       } else {
         arr[compareId].quantity += 1;
-        cartData.totalItems += 1;
+        console.log(arr.length)
+        cartData.totalItems = arr.length;
         cartData.totalPrice = 0;
         for (let i = 0; i < arr.length; i++) {
           let product = await productModel.findOne({ _id: arr[i].productId });
@@ -96,7 +97,7 @@ const createCart = async function (req, res) {
         } else {
           arr[compareId].quantity += 1;
         }
-        cartData.totalItems += 1;
+        cartData.totalItems = arr.length;
         cartData.totalPrice = 0;
         for (let i = 0; i < arr.length; i++) {
           let product = await productModel.findOne({ _id: arr[i].productId });
@@ -210,19 +211,19 @@ const updateCart = async function (req, res) {
     let quantity1 = arr[compareId].quantity;
     if (removeProduct == 0) {
       arr.splice(compareId - 1, 1);
-      cart.totalItems -= quantity1;
+      cart.totalItems =arr.length
       cart.totalPrice -= product.price * quantity1;
       await cart.save();
       return res.status(200).send({ status: true, data: cart });
     } else if (removeProduct == 1) {
       if (arr[compareId].quantity == 1) {
         arr.splice(compareId - 1, 1);
-        cart.totalItems -= 1;
+        cart.totalItems = arr.length;
         cart.totalPrice -= product.price;
         await cart.save();
         return res.status(200).send({ status: true, data: cart });
       } else if (arr[compareId].quantity > 1) arr[compareId].quantity -= 1;
-      cart.totalItems -= 1;
+      cart.totalItems = arr.length;
       cart.totalPrice -= product.price;
       await cart.save();
       return res.status(200).send({ status: true, data: cart });

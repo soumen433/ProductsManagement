@@ -33,6 +33,6 @@ router.route("/users/:userId/cart")
 
 //..............................ORDER......................................
 router.route("/users/:userId/orders")
-.post(orderCreate)
-.put(orderUpdate)
+.post(authentication, authorization, orderCreate)
+.put(authentication, authorization, orderUpdate)
 module.exports = router;

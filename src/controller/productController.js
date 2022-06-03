@@ -66,7 +66,7 @@ const createProduct = async function (req, res) {
     });
   }
 
-  if (Validator.isValidPrice(price)) {
+  if (!Validator.isValidPrice(price)) {
     return res.status(400).send({
       status: false,
       message:

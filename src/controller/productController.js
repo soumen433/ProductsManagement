@@ -144,7 +144,7 @@ const getProduct = async function (req, res) {
       }
     }
 
-    const query1 = await constructQuery(filter); // line-164
+    const query1 = await constructQuery(filter); // line-168
     let data = await productModel
       .find({ ...query, ...query1 })
       .collation({ locale: "en", strength: 2 })
